@@ -24,7 +24,7 @@ class PrettyManager
 	 */
 	public function readPath($path)
 	{
-		$this->givenPath = $path;
+		$this->givenPath = str_replace('//', '/', $path);
 		$this->absPath = str_replace('//', '/', getcwd().'/'.$this->givenPath);
 
 		if (is_file($this->absPath)) {
@@ -43,6 +43,22 @@ class PrettyManager
 		}
 
 		$this->returnContent($data);
+	}
+
+	public function uploadFile($uploadedFile, $uploadPath)
+	{
+		$targetFilename = str_replace('//', '/', getcwd().'/'.$uploadPath.'/'.$uploadedFile['name']);
+		$itt = 0;
+		while(file_exists($targetFilename)) {
+			$itt++;
+			print_r($uploadedFile);
+			$name = explode('.', $uploadedFile['name']);
+			$name[0] = "{$name[0]}-{$itt}";
+			$targetFilename = str_replace('//', '/', getcwd().'/'.$uploadPath.'/'.implode('.', $name));
+			print_r($targetFilename);
+		}
+
+		return move_uploaded_file($uploadedFile['tmp_name'], $targetFilename);
 	}
 
 	private function returnContent($content)
@@ -77,7 +93,7 @@ class PrettyManager
 		        if ($item != "." && $item != "..") {
 		        	array_push($content,  array(
 		        		'name' => $item,
-		        		'path' => $this->givenPath.'/'.$item,
+		        		'path' => str_replace('//', '/', $this->givenPath.'/'.$item),
 		        		'publicUrl' => is_file($this->absPath.'/'.$item) ? $this->getPublicUrl($item) : false,
 	        		));
 		        }
@@ -97,5 +113,10 @@ class PrettyManager
 }
 $pm = new PrettyManager;
 
-// Provide path or fallback to root
-$pm->readPath(isset($_GET['path']) ? $_GET['path'] : '/');
+if (strtolower($_SERVER['REQUEST_METHOD']) === 'get') {
+	$pm->readPath(isset($_GET['path']) ? $_GET['path'] : '/');
+} else {
+	foreach($_FILES as $file) {
+		echo json_encode( $pm->uploadFile($file, $_POST['uploadPath']) );
+	}
+}
