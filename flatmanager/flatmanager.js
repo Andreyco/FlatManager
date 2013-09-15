@@ -11,7 +11,7 @@
 
 		el = {};
 
-	el.modal = $('<div id="prettyManager" class="modal fade">' +
+	el.modal = $('<div id="flatManager" class="modal fade">' +
         '<div class="modal-dialog">' +
             '<div class="modal-content">' +
                 '<div class="modal-header">' +
@@ -183,6 +183,8 @@
 
     function onRightMouseClick(event, element)
     {
+        onLeftMouseClick(event, element);
+
         var dropdown = $('<ul class="dropdown-menu" role="menu" aria-labelledby="drop3"/>');
         for(attr in element.dataset) {
             if(attr === 'publicUrl') {
@@ -197,7 +199,7 @@
                 .appendTo(element)
                 .dropdown().dropdown('toggle');
         } else {
-            onLeftMouseClick(event, element);
+            dropdown = null;
         }
     }
 
@@ -228,7 +230,7 @@
 
     	// append content
     	if(!response.isFile) {
-            appendLevelHtml(response.content);
+            appendLevelHtml(response);
         } else {
             appendFileInfoHtml(response);
         }
@@ -246,20 +248,22 @@
 
     }
 
-    function appendLevelHtml(data)
+    function appendLevelHtml(directory)
     {
         var ul = document.createElement('ul');
         ul.dataset.path = appendSegmentToPath('/');
         ul.className = 'level';
+        
+        var listing = directory.content;
+        for(var index in listing) {
+            var item = listing[index],
+                li = document.createElement('li');
 
-
-        for(key in data) {
-            var li = document.createElement('li');
-            li.innerHTML = '<span>' + data[key].name + '</span>';
-            li.dataset.path = data[key].path;
+            li.innerHTML = '<span>' + item.name + '</span>';
+            li.dataset.path = item.path;
             li.dataset.readable = true;
-            if(data[key].publicUrl) {
-                li.dataset.publicUrl = data[key].publicUrl;
+            if(item.publicUrl) {
+                li.dataset.publicUrl = item.publicUrl;
             }
 
             ul.appendChild(li);
