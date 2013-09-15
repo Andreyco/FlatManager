@@ -1,26 +1,31 @@
 <?php
 
-class PrettyManager
+class FlatManager
 {
 	/**
-	 * Path to browse
+	 * Path to browse.
 	 *
 	 * @var string
 	 */
 	private $givenPath;
 
-	private $absPath;
-
 	/**
-	 * Public base URL. This URL should be
-	 * accessible over HTTP protocol
+	 * Absolute path used for internal purposes.
 	 *
 	 * @var string
 	 */
-	private $publicBaseUrl = 'http://localhost:8888/simplemanager/';
+	private $absPath;
 
 	/**
-	 * Read given path
+	 * Public URL. This URL should be
+	 * accessible over HTTP protocol.
+	 *
+	 * @var string
+	 */
+	private $publicBaseUrl = 'http://localhost:8888/flatmanager/';
+
+	/**
+	 * Read given path.
 	 */
 	public function readPath($path)
 	{
@@ -42,9 +47,16 @@ class PrettyManager
 			);
 		}
 
-		$this->returnContent($data);
+		return $data;
 	}
 
+	/**
+	 * Store uploaded file.
+	 *
+	 * @var $uploadedFile string
+	 * @var $uploadPath string
+	 * @return boolean
+	 */
 	public function uploadFile($uploadedFile, $uploadPath)
 	{
 		$targetFilename = str_replace('//', '/', getcwd().'/'.$uploadPath.'/'.$uploadedFile['name']);
@@ -59,11 +71,6 @@ class PrettyManager
 		}
 
 		return move_uploaded_file($uploadedFile['tmp_name'], $targetFilename);
-	}
-
-	private function returnContent($content)
-	{
-		echo json_encode($content);
 	}
 
 	private function getFileInfo()
@@ -84,6 +91,11 @@ class PrettyManager
 		return array_merge($return, $pathInfo);
 	}
 
+	/**
+	 * Read content of directory.
+	 *
+	 * @return array
+	 */
 	private function getDirContent()
 	{
 		$content = array();
@@ -104,6 +116,11 @@ class PrettyManager
 		return $content;
 	}
 
+	/**
+	 * Compose public URL for given path.
+	 *
+	 * @return string
+	 */
 	private function getPublicUrl($path)
 	{
 		return $this->publicBaseUrl.ltrim($path, '/');
@@ -111,12 +128,15 @@ class PrettyManager
 
 
 }
-$pm = new PrettyManager;
+
+$fm = new FlatManager;
 
 if (strtolower($_SERVER['REQUEST_METHOD']) === 'get') {
-	$pm->readPath(isset($_GET['path']) ? $_GET['path'] : '/');
+	$data = $fm->readPath(isset($_GET['path']) ? $_GET['path'] : '/');
+	echo json_encode($data);
 } else {
 	foreach($_FILES as $file) {
-		echo json_encode( $pm->uploadFile($file, $_POST['uploadPath']) );
+		$data = $fm->uploadFile($file, $_POST['uploadPath']);
+		echo json_encode($data);
 	}
 }

@@ -1,7 +1,7 @@
 (function( $ ) {
 
 	var opts = {
-			browser: 'prettyManager.php',
+			browser: 'flatmanager.php',
 			basePath: '/',
 		},
 
@@ -305,7 +305,7 @@
         return (pathOpened + '/' + segment).replace(/(?!http:)\/*\//g, "/");
     }
 
-    $.fn.prettyManager = function(options)
+    $.fn.flatManager = function(options)
     {
 
     	opts = $.extend( opts, options );
